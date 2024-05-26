@@ -1,0 +1,92 @@
+
+import speech_recognition as sr
+import pyttsx3
+import smtplib
+import datetime
+
+# Initialize the recognizer and engine
+r = sr.Recognizer()
+engine = pyttsx3.init()
+
+# Set up the email parameters
+smtp_server = 'smtp.gmail.com'
+smtp_port = 587
+
+sender_email = 'pblproject0123@gmail.com'
+sender_password = 'rdvdiipgerglywdv'
+
+# Define the function to speak out the text
+def speak(text):
+    print("Machine said :: " + text)
+    engine.say(text)
+    engine.runAndWait()
+
+#Define the function to greet the user
+def wishme():
+    hour = int(datetime.datetime.now().hour)
+    if hour >= 0 and hour < 12:
+        speak("Good Morning!")
+    elif hour >= 12 and hour < 18:
+        speak("Good Afternoon!")
+    else:
+        speak("Good Evening!")
+
+# Define the function to listen for the user's voice input
+def listen():
+    with sr.Microphone() as source:
+        r.adjust_for_ambient_noise(source)
+        print("Speak now...")
+        audio = r.listen(source)
+
+        try:
+            voice_input = r.recognize_google(audio)
+            print("You said: ", voice_input)
+            return voice_input
+        except sr.UnknownValueError:
+            print("Sorry, I didn't get that. Please try again.")
+            return None
+
+# Define the function to send the email
+def send_email(receiver_email, email_subject, email_body):
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+
+        message = f'Subject: {email_subject}\n\n{email_body}'
+        server.sendmail(sender_email, receiver_email, message)
+        server.quit()
+
+        speak("Email sent successfully!")
+    except Exception as e:
+        print(e)
+        speak("Sorry, I couldn't send the email. Please try again.")
+
+# Define the main function
+def main():
+    # Ask the user for the receiver's email address
+    speak("Who would you like to send the email to?")
+    receiver_name = listen()
+
+    # Retrieve the email address from a dictionary
+    email_dict = {"yash": "shivatareyash@gmail.com", "suraj": "suraj.gawade7808@gmail.com","shri": "shrikarkolte3609@gmail.com","robin":"robwadekar3011@gmail.com","tejas":"tejasdharmale6@gmail.com"}
+    receiver_email = email_dict.get(receiver_name.lower())
+
+    # If the email address is not found, ask the user to input it manually
+    while receiver_email is None:
+        speak("I'm sorry, I don't have that email address on file. Please enter it now.")
+        receiver_email = input("Recipient email address: ")
+
+    # Ask the user for the email subject and body
+    speak("What is the subject of your email?")
+    email_subject = listen()
+
+    speak("What would you like to say in your email?")
+    email_body = listen()
+
+    # Send the email
+    send_email(receiver_email, email_subject, email_body)
+    # speak("Email sent successfully")
+if _name_ == '_main_':
+    wishme()
+    main().  
